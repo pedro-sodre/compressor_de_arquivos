@@ -1,6 +1,16 @@
 #include "huffman.h"
 
-#define MAX_TREE_HT 10
+int pai (int i) {
+   return (i - 1)/2;
+}
+
+int esquerda (int i) {
+   return (i * 2) + 1;
+}
+
+int direita (int i) {
+   return (i * 2) + 2;
+}
 
 HuffmanVector* create_empty_HuffmanVector(int maxcapacity){
 
@@ -11,7 +21,7 @@ HuffmanVector* create_empty_HuffmanVector(int maxcapacity){
     temp->array = (HuffmanNode**)malloc(temp->maxcapacity * sizeof(HuffmanNode*));
 }
 
-HuffmanNode* createNode(char data, int freq){
+HuffmanNode* createNode(unsigned char data, int freq){
     HuffmanNode* temp = (HuffmanNode*)malloc(sizeof(HuffmanNode));
 
     temp->left = NULL;
@@ -29,8 +39,8 @@ void swap (HuffmanVector* Vector, int a, int b) {
 }
 
 void MinHeapify(HuffmanVector* Vector, int i) {
-    int esq = 2*i + 1;
-    int dir = 2*i + 2;
+    int esq = esquerda(i);
+    int dir = direita(i);
     int menor;
 
     if( esq < Vector->size && Vector->array[esq]->freq < Vector->array[i]->freq)
@@ -55,11 +65,27 @@ HuffmanNode* extractMinNode(HuffmanVector* Vector){
     return temp;
 }
 
+void heap_decrease_key (HuffmanVector* Vector, int i, HuffmanNode* Node){
+    if(Node->freq > Vector->array[i]->freq){
+        printf("Error: nova chave maior que valor atual");
+    }
+    else{
+        Vector->array[i] = Node;
+        while(i > 0 && Vector->array[pai(i)]->freq > Vector->array[i]->freq){
+            swap(Vector, pai(i), i);
+            i = pai(i);
+        }
+    }
+}
+
 void insertNode(HuffmanVector* Vector, HuffmanNode* Node){
     Vector->size = Vector->size + 1;
     int i = Vector->size -1;
+    while(i > 0 && Node->freq < Vector->array[pai(i)]->freq){
+        Vector->array[i] = Vector->array[pai(i)];
+        i = pai(i);
+    }
     Vector->array[i] = Node;
-    BuildMinHeap(Vector);
 }
 
 void BuildMinHeap(HuffmanVector* Vector){
@@ -69,36 +95,28 @@ void BuildMinHeap(HuffmanVector* Vector){
     }
 }
 
-void printArr(int arr[], int n){
-    int i;
-    for (i = 0; i < n; ++i)
-        printf("%d", arr[i]);
-
-    printf("\n");
-}
-
 int isLeaf(HuffmanNode* Node){
     return (!(Node->left) && !(Node->right));
 }
 
-HuffmanVector* buildVector(char data[], int freq[], int size){
+HuffmanVector* buildVector(unsigned int byteList[], int size){
     HuffmanVector* Vector = create_empty_HuffmanVector(size);
     int i;
 
     for(i=0 ; i<size ; i++){
-        Vector->array[i] = createNode(data[i], freq[i]);
+        Vector->array[i] = createNode(i, byteList[i]);
     }
     Vector->size = size;
     BuildMinHeap(Vector);
     return Vector;
 }
 
-HuffmanNode* buildTree(char data[], int freq[], int size){
+HuffmanNode* buildTree(unsigned int byteList[], int size){
     HuffmanNode* left;
     HuffmanNode* right;
     HuffmanNode* top;
 
-    HuffmanVector* Vector = buildVector(data, freq, size);
+    HuffmanVector* Vector = buildVector(byteList, size);
 
     while(Vector->size != 1){
         left = extractMinNode(Vector);
@@ -112,29 +130,91 @@ HuffmanNode* buildTree(char data[], int freq[], int size){
     return extractMinNode(Vector);
 }
 
-void printCodes(HuffmanNode* root, int arr[], int top){
+int getCode(HuffmanNode* Node, unsigned char data, char arr[], int size){
 
-    if (root->left) {
-
-        arr[top] = 0;
-        printCodes(root->left, arr, top + 1);
+    if(!Node->left && !Node->right && Node->data == data){
+        arr[size] = '\0';
+        return 1;
     }
-
-    if (root->right) {
-
-        arr[top] = 1;
-        printCodes(root->right, arr, top + 1);
-    }
-
-    if (isLeaf(root)) {
-
-        printf("%c: ", root->data);
-        printArr(arr, top);
+    else{
+        int flag = 0;
+        if(Node->left){
+            arr[size] = '0';
+            flag = getCode(Node->left, data, arr, size + 1);
+        }
+        if(flag == 0 && Node->right){
+            arr[size] = '1';
+            flag = getCode(Node->right, data, arr, size + 1);
+        }
+        if(flag == 0){
+            arr[size] = '\0';
+        }
+        return flag;
     }
 }
 
-void HuffmanCodes(char data[], int freq[], int size){
-    HuffmanNode* root = buildTree(data, freq, size);
-    int arr[MAX_TREE_HT], top = 0;
-    printCodes(root, arr, top);
+void BuildFrequencyList(FILE *entrada, unsigned int byteList[]){
+    unsigned char data;
+    while(fread(&data, 1, 1, entrada) > 0){
+        byteList[(int)data]++;
+    }
+    rewind(entrada);
+}
+
+void CompressFile(const char *input, const char *output){
+    FILE *original = fopen(input, "rb");
+    if(!original){
+        printf("Error opening input file");
+        exit(0);
+    }
+
+    FILE *compressed = fopen(output, "wb");
+    if(!compressed){
+        printf("Error opening output file");
+        exit(0);
+    }
+
+    unsigned int byteList[256] = {0};
+
+    BuildFrequencyList(original, byteList);
+
+    HuffmanNode* root = buildTree(byteList, 256);
+
+    fwrite(byteList, 256, sizeof(byteList[0]), compressed);
+
+    fseek(compressed, sizeof(int), SEEK_CUR);
+
+    unsigned char data;
+    int size = 0;
+    unsigned char aux = 0;
+
+    while(fread(&data, 1, 1, original) > 0){
+        char arr[1024] = {0};
+        getCode(root, data, arr, 0);
+        int i;
+        for(i = 0; arr[i] != '\0'; i++){
+            if(arr[i] == '1'){
+                aux = aux | (1 << (size % 8));
+            }
+            size++;
+            if(size % 8 == 0){
+                fwrite(&aux, 1, 1, compressed);
+                aux = 0;
+            }
+        }
+    }
+
+    fwrite(&aux, 1, 1, compressed);
+
+    fseek(compressed, 256*sizeof(unsigned int), SEEK_SET);
+
+    fwrite(&size, 1, 1, compressed);
+
+    fseek(original, 0L, SEEK_END);
+    double originalSize = ftell(original);
+
+    fseek(compressed, 0L, SEEK_END);
+    double compressedSize = ftell(compressed);
+
+    printf("\nTaxa de compressao: %d%%\n", (int)((100 * compressedSize) / originalSize));
 }

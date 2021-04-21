@@ -38,7 +38,7 @@ int main(){
 
     int size = sizeof(arr) / sizeof(arr[0]);
 
-    HuffmanCodes(arr, freq, size);
+    CompressFile("entrada.txt", "saida.txt");
 
     int binaries[] = {1100, 1101, 100, 101, 111, 0};
 
@@ -52,5 +52,5 @@ int main(){
     for(int i = 0; i < 6; i++)
         printf("%d: %c\n", binaries[i], getValue(hash, binaries[i]));
 
-    return 0;*/
+    return 0;
 }
