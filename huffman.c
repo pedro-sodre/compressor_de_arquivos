@@ -265,12 +265,13 @@ void DecompressFile(const char *input, const char *output)
     while(fread(&data, sizeof(unsigned char), 1, compressed) > 0)
     {
         mask = 1;
-        while(mask > 0)
+        while(mask > 0 && size > 0)
         {
             //Se o bit atual é 1, pega a subárvore da direita, se é 0, a da esquerda
             aux_node = (mask & data) ? aux_node->right : aux_node->left;
 
             mask <<= 1;
+            --size;
 
             //Se é um nó folha, escreve o caractere contido nele no arquivo descomprimido e volta para o início da árvore
             if(!aux_node->left && !aux_node->right)
