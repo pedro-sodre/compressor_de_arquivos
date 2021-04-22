@@ -214,12 +214,12 @@ void CompressFile(const char *input, const char *output){
             //Se o código no caracter não fecha 8 bits, o valor de aux é mantido para ser juntado ao próximo caracter
         }
     }
-    //Escreve os bits que sobraram no fim ( se não fecharam 8 bits)
+    //Escreve os bits que sobraram no fim (se não fecharam 8 bits)
     fwrite(&aux, 1, 1, compressed);
     //Coloca o cursor do arquivo na posição onde será escrito o tamanho
     fseek(compressed, 256*sizeof(unsigned int), SEEK_SET);
     //Escreve o tamanho do arquivo
-    fwrite(&size, 1, 1, compressed);
+    fwrite(&size, 4, 1, compressed);
 
     //Procura e escreve os tamanhos dos arquivos de entrada e saída para comparação posterior
     fseek(original, 0L, SEEK_END);
@@ -228,5 +228,56 @@ void CompressFile(const char *input, const char *output){
     fseek(compressed, 0L, SEEK_END);
     double compressedSize = ftell(compressed);
 
-    printf("\nTaxa de compressao: %d%%\n", (int)((100 * compressedSize) / originalSize));
+    printf("Taxa de compressao: %d%%\n", (int)((100 * compressedSize) / originalSize));
+}
+
+void DecompressFile(const char *input, const char *output)
+{
+    //Abre os arquivos de entrada (comprimido - compressed) e saída (descomprimido - decompressed) 
+    FILE *compressed = fopen(input, "rb");
+    if(!compressed){
+        printf("Error opening input file");
+        exit(0);
+    }
+
+    FILE *decompressed = fopen(output, "wb");
+    if(!decompressed){
+        printf("Error opening output file");
+        exit(0);
+    }
+
+    unsigned int byteList[256];
+    int size;
+
+    //Lê os dados da lista de bytes (frequências de cada caractere) e tamanho do arquivo comprimido
+    //e armazena em variáveis locais
+    fread(&byteList, sizeof(unsigned int), 256, compressed);
+    fread(&size, sizeof(int), 1, compressed);
+
+    //Constrói a árvore de Huffman com base na lista de bytes
+    HuffmanNode* root = buildTree(byteList, 256);
+
+    unsigned char data;
+    HuffmanNode* aux_node = root;
+    unsigned char mask = 0;
+
+    //Lê o restante do arquivo comprimido byte por byte
+    while(fread(&data, sizeof(unsigned char), 1, compressed) > 0)
+    {
+        mask = 1;
+        while(mask > 0)
+        {
+            //Se o bit atual é 1, pega a subárvore da direita, se é 0, a da esquerda
+            aux_node = (mask & data) ? aux_node->right : aux_node->left;
+
+            mask <<= 1;
+
+            //Se é um nó folha, escreve o caractere contido nele no arquivo descomprimido e volta para o início da árvore
+            if(!aux_node->left && !aux_node->right)
+            {
+                fwrite(&aux_node->data, sizeof(unsigned char), 1, decompressed);  
+                aux_node = root;
+            }   
+        }
+    }
 }

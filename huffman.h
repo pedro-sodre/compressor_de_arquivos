@@ -57,3 +57,5 @@ int HuffmanCodes(HuffmanNode* Node, unsigned char data, char arr[], int size);
 void getFrequency(FILE *entrada, unsigned int byteList[]);
 
 void CompressFile(const char *input, const char *output);
+
+void DecompressFile(const char *input, const char *output);

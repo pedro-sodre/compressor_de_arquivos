@@ -33,24 +33,14 @@ int main(){
     return 0;
 
     */
-    char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f' };
-    int freq[] = { 5, 9, 12, 13, 16, 45 };
 
-    int size = sizeof(arr) / sizeof(arr[0]);
-
-    CompressFile("entrada.txt", "saida.txt");
-
-    int binaries[] = {1100, 1101, 100, 101, 111, 0};
-
-    Hash* hash = createHash(6);
-
-    for(int i = 0; i < 6; i++)
-        insertChained(hash, binaries[i], arr[i]);
-
-    printf("\n***************************************************************\n\n");
-
-    for(int i = 0; i < 6; i++)
-        printf("%d: %c\n", binaries[i], getValue(hash, binaries[i]));
+    printf("Comprimindo...\n");
+    CompressFile("entrada.txt", "comprimido");
+    printf("Comprimido com sucesso!\n");
+    printf("*********************************************************\n");
+    printf("Descomprimindo...\n");
+    DecompressFile("comprimido", "descomprimido.txt");
+    printf("Descomprimido com sucesso!\n");
 
     return 0;
 }
