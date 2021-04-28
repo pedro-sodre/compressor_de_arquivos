@@ -31,3 +31,5 @@ void insertChained(Hash* H, char* key, __uint64_t index);
 void freeHash(Hash* H);
 
 __uint64_t getValue(Hash* H, char* key);
+
+void CompressFileLZ78(const char* input, const char* output);
