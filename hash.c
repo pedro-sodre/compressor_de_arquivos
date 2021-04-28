@@ -1,64 +1,59 @@
 #include "hash.h"
 
-int hashFunction(int M, int key)
+unsigned long hashFunction(char* key, unsigned long M)
 {
-    double mult = (key*0.618033);
-    return (int)M*(mult - (int)mult);
+    int i, h = key[0];
+    for (i = 1; key[i] != '\0'; i++)
+        h = (h * 256 + key[i]) % M;
+    return h;
 }
 
-Hash* createHash(int entries)
+Hash* createHash(unsigned long M)
 {
     Hash *h = (Hash*)malloc(sizeof(Hash));
 
-    //Pega a potência de dois mais próxima por baixo
-    //do número de entradas passado para construir a hash
-    //e utiliza ela no lugar (útil para hashing por multiplicação)
-    int max_entries = pow(2, (int)log2(entries));
 
-    h->n_entries = max_entries;
-    h->n_keys = 0;
-    h->nodes = (HashNode **)malloc(max_entries*sizeof(HashNode*));
+    h->M = M;
+    h->N = 0;
+    h->nodes = (HashNode **)malloc(M*sizeof(HashNode*));
 
-    for(int i = 0; i < h->n_entries; i++)
+    for(int i = 0; i < h->M; i++)
         h->nodes[i] = NULL;
 
     return h;
 }
 
-void insertChained(Hash* h, int key, char value)
+void insertChained(Hash* H, char* key, __uint64_t value)
 {
-    int index = hashFunction(h->n_entries, key);
+    unsigned long index = hashFunction(key, H->M);
 
     HashNode* node = (HashNode*)malloc(sizeof(HashNode));
-    node->key = key;
-    node->value = value;
+    strcpy(node->key, key);
+    node->pair_index = value;
 
-    node->next = h->nodes[index];
-    h->nodes[index] = node;
-    h->n_keys++;
+    node->next = H->nodes[index];
+    H->nodes[index] = node;
+    H->N++;
 }
 
-void freeHash(Hash* h)
+void freeHash(Hash* H)
 {
-    for(int i = 0; i < h->n_entries; i++)
-        free(h->nodes[i]);
+    for(int i = 0; i < H->M; i++)
+        free(H->nodes[i]);
 
-    free(h);
+    free(H);
 }
 
-char getValue(Hash* h, int key)
+__uint64_t getValue(Hash* H, char* key)
 {
-    int index = hashFunction(h->n_entries, key);
+    unsigned long index = hashFunction(key, H->M);
 
-    HashNode* temp = h->nodes[index];
+    HashNode* temp = H->nodes[index];
     if(temp == NULL)
-    {
-        printf("ERRO! Chave inválida!");
-        exit(1);
-    }
-
-    while(temp->key != key && temp != NULL)
+        return 0;
+        
+    while(temp->key != key && temp->next != NULL)
         temp = temp->next;
 
-    return temp->value;
+    return temp->pair_index;
 }

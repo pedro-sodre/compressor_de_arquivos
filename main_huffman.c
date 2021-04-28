@@ -42,5 +42,18 @@ int main(){
     DecompressFile("comprimido", "descomprimido.txt");
     printf("Descomprimido com sucesso!\n");
 
+
+    printf("\n*********************************************************\n\n");
+
+    Hash* H = createHash(1213);
+    insertChained(H, "A", 1);
+    insertChained(H, "B", 2);
+    insertChained(H, "AB", 3);
+
+    printf("AB: %lu\n", getValue(H, "AB"));
+    printf("B: %lu\n", getValue(H, "B"));
+    printf("A: %lu\n", getValue(H, "A"));
+    printf("C: %lu\n", getValue(H, "C"));
+
     return 0;
 }

@@ -1,32 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 /**
- * Tabela hash com hashing de multiplicação e tratamento de colisões
+ * Tabela hash com hashing de strings e tratamento de colisões
  * por encadeamento
  *
  */
 typedef struct hash_node
 {
-    int key;
-    char value;
+    char key[256];
+    __uint64_t pair_index;
     struct hash_node* next;
 } HashNode;
 
 typedef struct hash 
 {
-    int n_entries;
-    int n_keys;
+    unsigned long M;
+    unsigned long N;
     HashNode **nodes;
 } Hash;
 
-int hashFunction(int M, int key);
+unsigned long hashFunction(char* key, unsigned long M);
 
-Hash* createHash(int entries);
+Hash* createHash(unsigned long M);
 
-void insertChained(Hash* h, int key, char value);
+void insertChained(Hash* H, char* key, __uint64_t index);
 
-void freeHash(Hash* h);
+void freeHash(Hash* H);
 
-char getValue(Hash* h, int key);
+__uint64_t getValue(Hash* H, char* key);
