@@ -34,12 +34,12 @@ int main(){
 
     */
 
-    printf("Comprimindo...\n");
-    CompressFile("entrada.txt", "comprimido");
+    printf("Comprimindo Huffman...\n");
+    CompressFile("entrada.txt", "comprimidoHuffman");
     printf("Comprimido com sucesso!\n");
     printf("*********************************************************\n");
-    printf("Descomprimindo...\n");
-    DecompressFile("comprimido", "descomprimido.txt");
+    printf("Descomprimindo Huffman...\n");
+    DecompressFile("comprimidoHuffman", "descomprimidoHuffman.txt");
     printf("Descomprimido com sucesso!\n");
 
     printf("\n*********************************************************\n\n");
@@ -47,6 +47,12 @@ int main(){
     printf("Comprimindo LZ78...\n");
     CompressFileLZ78("entrada.txt", "comprimidoLZ78");
     printf("Comprimido com sucesso!\n");
+    printf("*********************************************************\n");
+    printf("Descomprimindo LZ78...\n");
+    DecompressFileLZ78("comprimidoLZ78", "descomprimidoLZ78.txt");
+    printf("Descomprimido com sucesso!\n");
+
+    printf("\n*********************************************************\n\n");
 
     return 0;
 }

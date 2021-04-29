@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <inttypes.h>
 
 /**
  * Tabela hash com hashing de strings e tratamento de colisões
@@ -15,7 +16,7 @@ typedef struct hash_node
     struct hash_node* next;
 } HashNode;
 
-typedef struct hash 
+typedef struct hash
 {
     unsigned long M;
     unsigned long N;
@@ -33,3 +34,5 @@ void freeHash(Hash* H);
 __uint64_t getValue(Hash* H, char* key);
 
 void CompressFileLZ78(const char* input, const char* output);
+
+void DecompressFileLZ78(const char* input, const char* output);

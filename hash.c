@@ -89,7 +89,7 @@ void CompressFileLZ78(const char* input, const char* output)
 
     //Índice da dupla do LZ78
     __uint64_t current_index = 1;
-    
+
     //Último índice encontrado no dicionário
     __uint64_t last_index = 0;
 
@@ -100,11 +100,15 @@ void CompressFileLZ78(const char* input, const char* output)
 
     while(fread(&data, 1, 1, original) > 0)
     {
+        //Transforma o caracter em string
+        unsigned char str[2];
+        str[0] = data;
+        str[1] = '\0';
         //Se o prefixo estiver cheio, zere ele
         if(strlen(prefix) >= 255)
             strcpy(prefix, "");
 
-        strcat(prefix, &data);
+        strcat(prefix, str);
         __uint64_t search_index = getValue(dict, prefix);
 
         //Se não encontrar o prefixo no dicionário, insira ele
@@ -112,11 +116,10 @@ void CompressFileLZ78(const char* input, const char* output)
         {
             insertChained(dict, prefix, current_index++);
 
-            //Escreve o índice do último prefixo existente no dicionário 
+            //Escreve o índice do último prefixo existente no dicionário
             //e o caractere significativo no arquivo de saída
             fwrite(&last_index, sizeof(__uint64_t), 1, compressed);
             fwrite(&data, sizeof(unsigned char), 1, compressed);
-            
             last_index = 0;
             strcpy(prefix, "");
         }
@@ -135,4 +138,75 @@ void CompressFileLZ78(const char* input, const char* output)
     double compressedSize = ftell(compressed);
 
     printf("Taxa de compressao: %d%%\n", (int)((100 * compressedSize) / originalSize));
+}
+
+void DecompressFileLZ78(const char* input, const char* output){
+    //Abre os arquivos de input e output
+    FILE *compressed = fopen(input, "rb");
+    if(!compressed){
+        printf("Error opening input file");
+        exit(0);
+    }
+
+    FILE *decompressed = fopen(output, "wb");
+    if(!decompressed){
+        printf("Error opening output file");
+        exit(0);
+    }
+
+    //Lê o indíce máximo do arquivo comprimido
+    __uint64_t max_index = 0;
+    fread(&max_index, sizeof(__uint64_t), 1, compressed);
+
+    //Inicializa o vetor de strings
+    unsigned char string_array[max_index + 1][MAX_PREFIX_LENGHT];
+
+    //Inicializa a string que guardará os prefixos
+    unsigned char prefix[MAX_PREFIX_LENGHT];
+    strcpy(prefix, "");
+    //caracter significativo lido no arquivo comprimido
+    unsigned char data;
+    //Índice do atual do vetor para adicionar novos prefixos
+    __uint64_t array_index = 1;
+    //Índice que será lido no arquivo comprimido
+    __uint64_t current_index = 0;
+
+    //Lê o ínidice atual presente no arquivo comprimido
+    while(fread(&current_index, sizeof(__uint64_t), 1, compressed) > 0){
+        //Se for 0, é um caracter sozinho
+        if(current_index == 0){
+            //Lê o caracter ao lado do índice
+            fread(&data, sizeof(unsigned char), 1, compressed);
+            //Escreve apenas esse caracter
+            fwrite(&data, sizeof(unsigned char), 1, decompressed);
+            //Transforma o caracter em string
+            unsigned char str[2];
+            str[0] = data;
+            str[1] = '\0';
+            //Adiciona ele ao vetor de strings conhecidas
+            strcpy(string_array[array_index], str);
+            //Aumenta o índice atual do vetor
+            array_index++;
+        }
+        //Se não for 0, ele precisará buscar no vetor o prefixo conhecido
+        else{
+            //Lê o caracter significativo
+            fread(&data, sizeof(unsigned char), 1, compressed);
+            //Copia para o prefixo, a string já conhecida referente ao índice lido
+            strcpy(prefix, string_array[current_index]);
+            //Transforma o caracter em string
+            unsigned char str[2];
+            str[0] = data;
+            str[1] = '\0';
+            //Junta com o caracter significativo
+            strcat(prefix, str);
+            //Escreve no arquivo de saída a string inteira
+            fwrite(&prefix, sizeof(unsigned char), strlen(prefix), decompressed);
+            //Adiciona a nova string ao vetor
+            strcpy(string_array[array_index], prefix);
+            //Aumenta o índice atual do vetor
+            array_index++;
+        }
+    }
+
 }
