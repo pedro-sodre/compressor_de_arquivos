@@ -34,8 +34,29 @@ int main(){
 
     */
 
+    printf("Comprimindo LZ78...\n");
+    CompressFileLZ78("entrada2.txt", "comprimidoLZ78");
+    printf("Comprimido com sucesso!\n");
+    printf("*********************************************************\n");
+    printf("Descomprimindo LZ78...\n");
+    DecompressFileLZ78("comprimidoLZ78", "descomprimidoLZ78.txt");
+    printf("Descomprimido com sucesso!\n");
+
+    // printf("\n*********************************************************\n\n");   
+
+    // printf("Comprimindo duplo...\n");
+    // CompressFile("comprimidoLZ78", "comprimidoDuplo");
+    // printf("Comprimido com sucesso!\n");
+    // printf("*********************************************************\n");
+    // printf("Descomprimindo duplo...\n");
+    // DecompressFile("comprimidoDuplo", "descomprimidoDuploHuffman");
+    // DecompressFileLZ78("descomprimidoDuploHuffman", "descomprimidoDuplo.txt");
+    // printf("Descomprimido com sucesso!\n");
+
+    printf("\n*********************************************************\n\n");
+
     printf("Comprimindo Huffman...\n");
-    CompressFile("lorem_ipsum.txt", "comprimidoHuffman");
+    CompressFile("entrada2.txt", "comprimidoHuffman");
     printf("Comprimido com sucesso!\n");
     printf("*********************************************************\n");
     printf("Descomprimindo Huffman...\n");
@@ -44,15 +65,16 @@ int main(){
 
     printf("\n*********************************************************\n\n");
 
-    printf("Comprimindo LZ78...\n");
-    CompressFileLZ78("lorem_ipsum.txt", "comprimidoLZ78");
-    printf("Comprimido com sucesso!\n");
-    printf("*********************************************************\n");
-    printf("Descomprimindo LZ78...\n");
-    DecompressFileLZ78("comprimidoLZ78", "descomprimidoLZ78.txt");
-    printf("Descomprimido com sucesso!\n");
+    // printf("Comprimindo duplo2...\n");
+    // CompressFileLZ78("comprimidoHuffman", "comprimidoDuplo2");
+    // printf("Comprimido com sucesso!\n");
+    // printf("*********************************************************\n");
+    // printf("Descomprimindo duplo2...\n");
+    // DecompressFileLZ78("comprimidoDuplo2", "descomprimidoDuplo2LZ78");
+    // DecompressFile("descomprimidoDuplo2LZ78", "descomprimidoDuplo2.txt");
+    // printf("Descomprimido com sucesso!\n");
 
-    printf("\n*********************************************************\n\n");
+    // printf("\n*********************************************************\n\n");
 
     return 0;
 }

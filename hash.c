@@ -24,7 +24,7 @@ Hash* createHash(unsigned long M)
     return h;
 }
 
-void insertChained(Hash* H, char* key, __uint64_t value)
+void insertChained(Hash* H, char* key, unsigned int value)
 {
     unsigned long index = hashFunction(key, H->M);
 
@@ -45,7 +45,7 @@ void freeHash(Hash* H)
     free(H);
 }
 
-__uint64_t getValue(Hash* H, char* key)
+unsigned int getValue(Hash* H, char* key)
 {
     unsigned long index = hashFunction(key, H->M);
 
@@ -86,15 +86,15 @@ void CompressFileLZ78(const char* input, const char* output)
     unsigned char data;
 
     //Índice da dupla do LZ78
-    __uint64_t current_index = 1;
+    unsigned int current_index = 1;
 
     //Último índice encontrado no dicionário
-    __uint64_t last_index = 0;
+    unsigned int last_index = 0;
 
     Hash* dict = createHash(MAX_DICT_SIZE);
 
     //Reserva espaço pro número de entradas do dicionário
-    fseek(compressed, sizeof(__uint64_t), SEEK_CUR);
+    fseek(compressed, sizeof(unsigned int), SEEK_CUR);
 
     while(fread(&data, 1, 1, original) > 0)
     {
@@ -104,7 +104,7 @@ void CompressFileLZ78(const char* input, const char* output)
         str[1] = '\0';
 
         strcat(prefix, str);
-        __uint64_t search_index = getValue(dict, prefix);
+        unsigned int search_index = getValue(dict, prefix);
 
 
         //Se não encontrar o prefixo no dicionário, insira ele
@@ -114,7 +114,7 @@ void CompressFileLZ78(const char* input, const char* output)
  
             //Escreve o índice do último prefixo existente no dicionário
             //e o caractere significativo no arquivo de saída
-            fwrite(&last_index, sizeof(__uint64_t), 1, compressed);
+            fwrite(&last_index, sizeof(unsigned int), 1, compressed);
             fwrite(&data, sizeof(unsigned char), 1, compressed);
             last_index = 0;
 
@@ -128,7 +128,7 @@ void CompressFileLZ78(const char* input, const char* output)
             {
                 insertChained(dict, prefix, current_index++);
                 // printf("%s\n***********\n", prefix);
-                fwrite(&last_index, sizeof(__uint64_t), 1, compressed);
+                fwrite(&last_index, sizeof(unsigned int), 1, compressed);
                 fwrite(&data, sizeof(unsigned char), 1, compressed);
                 last_index = 0;
                 // strcpy(prefix, "");
@@ -139,15 +139,16 @@ void CompressFileLZ78(const char* input, const char* output)
         }
     }
 
-    insertChained(dict, prefix, current_index++);
+    // insertChained(dict, prefix, current_index++);
     unsigned char empty = '\0';
-    fwrite(&last_index, sizeof(unsigned char), 1, compressed);
+    fwrite(&last_index, sizeof(unsigned int), 1, compressed);
     fwrite(&empty, sizeof(unsigned char), 1, compressed);
-    // dict->N++;
+    dict->N++;
+    // printf("%u - %s\n", last_index, prefix);
 
     //Escreve o número de índices do dicionário
     fseek(compressed, 0L, SEEK_SET);
-    fwrite(&dict->N, sizeof(__uint64_t), 1, compressed);
+    fwrite(&dict->N, sizeof(unsigned int), 1, compressed);
 
     fseek(original, 0L, SEEK_END);
     double originalSize = ftell(original);
@@ -175,12 +176,12 @@ void DecompressFileLZ78(const char* input, const char* output){
     }
 
     //Lê o indíce máximo do arquivo comprimido
-    __uint64_t max_index = 0;
-    fread(&max_index, sizeof(__uint64_t), 1, compressed);
+    unsigned int max_index = 0;
+    fread(&max_index, sizeof(unsigned int), 1, compressed);
 
     //Inicializa o vetor de strings
     unsigned char** string_array = (unsigned char**)malloc(max_index * sizeof(unsigned char*));
-    for(uint64_t i = 0; i < max_index; i++)
+    for(unsigned int i = 0; i < max_index; i++)
     {
         string_array[i] = (unsigned char*)malloc(MAX_PREFIX_LENGHT * sizeof(unsigned char));
         string_array[i][0] = '\0';
@@ -192,12 +193,12 @@ void DecompressFileLZ78(const char* input, const char* output){
     //caracter significativo lido no arquivo comprimido
     unsigned char data;
     //Índice do atual do vetor para adicionar novos prefixos
-    __uint64_t array_index = 1;
+    unsigned int array_index = 0;
     //Índice que será lido no arquivo comprimido
-    __uint64_t current_index = 0;
+    unsigned int current_index = 0;
 
     //Lê o ínidice atual presente no arquivo comprimido
-    while(fread(&current_index, sizeof(__uint64_t), 1, compressed) > 0){
+    while(fread(&current_index, sizeof(unsigned int), 1, compressed) > 0){
         //Se for 0, é um caracter sozinho
         if(current_index == 0){
             //Lê o caracter ao lado do índice
@@ -215,11 +216,12 @@ void DecompressFileLZ78(const char* input, const char* output){
         }
         //Se não for 0, ele precisará buscar no vetor o prefixo conhecido
         else{
+            // printf("%u - %s\n", current_index, string_array[current_index]);
             //Lê o caracter significativo
             fread(&data, sizeof(unsigned char), 1, compressed);
             //Copia para o prefixo, a string já conhecida referente ao índice lido
             prefix[0] = '\0';
-            strcpy(prefix, string_array[current_index]);
+            strcpy(prefix, string_array[current_index - 1]);
             //Transforma o caracter em string
             unsigned char str[2];
             str[0] = data;
@@ -234,5 +236,5 @@ void DecompressFileLZ78(const char* input, const char* output){
             array_index++;
         }
     }
-
+    // printf("%u - %s - %u\n", current_index, string_array[14974], array_index);
 }

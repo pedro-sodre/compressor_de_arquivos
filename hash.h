@@ -16,7 +16,7 @@
 typedef struct hash_node
 {
     char key[MAX_PREFIX_LENGHT];
-    __uint64_t pair_index;
+    unsigned int pair_index;
     struct hash_node* next;
 } HashNode;
 
@@ -31,11 +31,11 @@ unsigned long hashFunction(char* key, unsigned long M);
 
 Hash* createHash(unsigned long M);
 
-void insertChained(Hash* H, char* key, __uint64_t index);
+void insertChained(Hash* H, char* key, unsigned int index);
 
 void freeHash(Hash* H);
 
-__uint64_t getValue(Hash* H, char* key);
+unsigned int getValue(Hash* H, char* key);
 
 void CompressFileLZ78(const char* input, const char* output);
 
