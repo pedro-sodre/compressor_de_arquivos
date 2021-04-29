@@ -4,6 +4,10 @@
 #include <string.h>
 #include <inttypes.h>
 
+
+#define MAX_PREFIX_LENGHT 16
+#define MAX_DICT_SIZE 1024
+
 /**
  * Tabela hash com hashing de strings e tratamento de colisões
  * por encadeamento
@@ -11,7 +15,7 @@
  */
 typedef struct hash_node
 {
-    char key[256];
+    char key[MAX_PREFIX_LENGHT];
     __uint64_t pair_index;
     struct hash_node* next;
 } HashNode;

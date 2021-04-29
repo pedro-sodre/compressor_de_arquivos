@@ -1,8 +1,5 @@
 #include "hash.h"
 
-#define MAX_PREFIX_LENGHT 256
-#define MAX_DICT_SIZE 1024
-
 unsigned long hashFunction(char* key, unsigned long M)
 {
     int i;
@@ -57,13 +54,14 @@ __uint64_t getValue(Hash* H, char* key)
     if(temp == NULL)
         return 0;
 
-    while(temp->key != key && temp != NULL && temp->next != NULL)
-    {
-        //printf("%s\n", temp->key);
+    while(temp->next != NULL)
+    {   
+        if(strcmp(temp->key, key) == 0)
+            return temp->pair_index;
         temp = temp->next;
     }
 
-    return temp->pair_index;
+    return 0;
 }
 
 void CompressFileLZ78(const char* input, const char* output)
@@ -83,7 +81,7 @@ void CompressFileLZ78(const char* input, const char* output)
 
     //Inicializa prefix com uma string vazia
     unsigned char prefix[MAX_PREFIX_LENGHT];
-    strcpy(prefix, "");
+    prefix[0] = '\0';
 
     unsigned char data;
 
@@ -104,28 +102,48 @@ void CompressFileLZ78(const char* input, const char* output)
         unsigned char str[2];
         str[0] = data;
         str[1] = '\0';
-        //Se o prefixo estiver cheio, zere ele
-        if(strlen(prefix) >= 255)
-            strcpy(prefix, "");
 
         strcat(prefix, str);
         __uint64_t search_index = getValue(dict, prefix);
+
 
         //Se não encontrar o prefixo no dicionário, insira ele
         if(search_index == 0)
         {
             insertChained(dict, prefix, current_index++);
-
+ 
             //Escreve o índice do último prefixo existente no dicionário
             //e o caractere significativo no arquivo de saída
             fwrite(&last_index, sizeof(__uint64_t), 1, compressed);
             fwrite(&data, sizeof(unsigned char), 1, compressed);
             last_index = 0;
-            strcpy(prefix, "");
+
+            // strcpy(prefix, "");
+            prefix[0] = '\0';
         }
         else
-            last_index = search_index;
+        {
+
+            if(strlen(prefix) >= MAX_PREFIX_LENGHT - 1)
+            {
+                insertChained(dict, prefix, current_index++);
+                // printf("%s\n***********\n", prefix);
+                fwrite(&last_index, sizeof(__uint64_t), 1, compressed);
+                fwrite(&data, sizeof(unsigned char), 1, compressed);
+                last_index = 0;
+                // strcpy(prefix, "");
+                prefix[0] = '\0';
+            }
+            else
+                last_index = search_index;
+        }
     }
+
+    insertChained(dict, prefix, current_index++);
+    unsigned char empty = '\0';
+    fwrite(&last_index, sizeof(unsigned char), 1, compressed);
+    fwrite(&empty, sizeof(unsigned char), 1, compressed);
+    // dict->N++;
 
     //Escreve o número de índices do dicionário
     fseek(compressed, 0L, SEEK_SET);
@@ -136,6 +154,8 @@ void CompressFileLZ78(const char* input, const char* output)
 
     fseek(compressed, 0L, SEEK_END);
     double compressedSize = ftell(compressed);
+
+    freeHash(dict);
 
     printf("Taxa de compressao: %d%%\n", (int)((100 * compressedSize) / originalSize));
 }
@@ -159,7 +179,12 @@ void DecompressFileLZ78(const char* input, const char* output){
     fread(&max_index, sizeof(__uint64_t), 1, compressed);
 
     //Inicializa o vetor de strings
-    unsigned char string_array[max_index + 1][MAX_PREFIX_LENGHT];
+    unsigned char** string_array = (unsigned char**)malloc(max_index * sizeof(unsigned char*));
+    for(uint64_t i = 0; i < max_index; i++)
+    {
+        string_array[i] = (unsigned char*)malloc(MAX_PREFIX_LENGHT * sizeof(unsigned char));
+        string_array[i][0] = '\0';
+    }
 
     //Inicializa a string que guardará os prefixos
     unsigned char prefix[MAX_PREFIX_LENGHT];
@@ -193,6 +218,7 @@ void DecompressFileLZ78(const char* input, const char* output){
             //Lê o caracter significativo
             fread(&data, sizeof(unsigned char), 1, compressed);
             //Copia para o prefixo, a string já conhecida referente ao índice lido
+            prefix[0] = '\0';
             strcpy(prefix, string_array[current_index]);
             //Transforma o caracter em string
             unsigned char str[2];

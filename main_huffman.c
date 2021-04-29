@@ -35,7 +35,7 @@ int main(){
     */
 
     printf("Comprimindo Huffman...\n");
-    CompressFile("entrada.txt", "comprimidoHuffman");
+    CompressFile("lorem_ipsum.txt", "comprimidoHuffman");
     printf("Comprimido com sucesso!\n");
     printf("*********************************************************\n");
     printf("Descomprimindo Huffman...\n");
@@ -45,7 +45,7 @@ int main(){
     printf("\n*********************************************************\n\n");
 
     printf("Comprimindo LZ78...\n");
-    CompressFileLZ78("entrada.txt", "comprimidoLZ78");
+    CompressFileLZ78("lorem_ipsum.txt", "comprimidoLZ78");
     printf("Comprimido com sucesso!\n");
     printf("*********************************************************\n");
     printf("Descomprimindo LZ78...\n");
