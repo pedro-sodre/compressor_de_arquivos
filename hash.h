@@ -5,7 +5,7 @@
 #include <inttypes.h>
 
 
-#define MAX_PREFIX_LENGHT 16
+#define MAX_PREFIX_LENGHT 256
 #define MAX_DICT_SIZE 1024
 
 /**
