@@ -4,8 +4,9 @@
 
 int main(){
     //menu
-    /*
+    
     int escolha;
+    char arquivo[30];
     do {
         printf("\nO que você deseja fazer?");
         printf("\n1 - Comprimir Arquivo");
@@ -16,12 +17,26 @@ int main(){
 
         switch (escolha) {
         case 1:
-            printf("Comprimindo");
-            //comprimir();
+            printf("Qual o nome do arquivo ?\n");
+            scanf("%s", arquivo);
+            printf("Deseja comprimir por 1 - Huffman ou por 2 - LZ78 ?\n");
+            scanf("%d", &escolha);
+            if (escolha == 1){
+                CompressFile(arquivo, srtcat(arquivo, "-comprimido"));
+            }else if (escolha == 2){
+                CompressFileLZ78Trie(arquivo, srtcat(arquivo, "-comprimido"));
+            }
             break;
         case 2:
-            printf("Descomprimindo");
-            //descomprimir();
+            printf("Qual o nome do arquivo ?\n");
+            scanf("%s", arquivo);
+            printf("Deseja descomprimir por 1 - Huffman ou por 2 - LZ78 ?\n");
+            scanf("%d", &escolha);
+            if (escolha == 1){
+                DecompressFile(arquivo, strcat(arquivo, "-descomprimido"));
+            }else if (escolha == 2){
+                DecompressFileLZ78Trie(arquivo, strcat(arquivo, "-descomprimido"));
+            }
             break;
         case 3:
             printf("Saindo");
@@ -33,7 +48,7 @@ int main(){
 
     return 0;
 
-    */
+    
 
     // LZ78Trie* trie = createLZ78Trie();
     // insertTrie(trie, "abaabacba", 1);
