@@ -1,13 +1,28 @@
-all: output clean
+all: teste1 teste2 teste3 clean
+	@echo "Primeiro teste(.txt): ./teste1"
+	@echo "Segundo teste(.png): ./teste2"
+	@echo "Terceiro teste(.pdf): ./teste3"
 
-output: huffman.o hash.o main_huffman.o trie.o
-	gcc -g -o output trie.o huffman.o hash.o main_huffman.o -lm
+teste1: huffman.o hash.o main1.o trie.o
+	gcc -g -o teste1 trie.o huffman.o hash.o main1.o -lm
+
+teste2: huffman.o hash.o main2.o
+	gcc -g -o teste2 huffman.o hash.o main2.o -lm
+
+teste3: huffman.o hash.o main3.o
+	gcc -g -o teste3 huffman.o hash.o main3.o -lm
 
 huffman.o: huffman.c
 	gcc -g -o huffman.o -c huffman.c
 
-main_huffman.o: main_huffman.c
-	gcc -g -o main_huffman.o -c main_huffman.c
+main1.o: main1.c
+	gcc -g -o main1.o -c main1.c
+
+main2.o: main2.c
+	gcc -g -o main2.o -c main2.c
+
+main3.o: main3.c
+	gcc -g -o main3.o -c main3.c
 
 hash.o: hash.c
 	gcc -g -o hash.o -c hash.c
@@ -15,8 +30,8 @@ hash.o: hash.c
 trie.o: trie.c
 	gcc -g -o trie.o -c trie.c
 
-clean: 
+clean:
 	rm -f *.o
 
 execClean:
-	rm -f output
+	rm -f teste

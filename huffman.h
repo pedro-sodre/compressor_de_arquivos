@@ -3,7 +3,6 @@
 #include <time.h>
 #include <string.h>
 #include <math.h>
-#include <limits.h>
 
 typedef struct HuffmanNode{
     unsigned char data;
@@ -40,8 +39,6 @@ void MinHeapify(HuffmanVector* Vector, int i);
 
 HuffmanNode* extractMinNode(HuffmanVector* Vector);
 
-void heap_decrease_key (HuffmanVector* Vector, int i, HuffmanNode* Node);
-
 void insertNode(HuffmanVector* Vector, HuffmanNode* Node);
 
 void BuildMinHeap(HuffmanVector* Vector);
@@ -52,9 +49,9 @@ HuffmanVector* buildVector(unsigned int byteList[], int size);
 
 HuffmanNode* buildTree(unsigned int byteList[], int size);
 
-int HuffmanCodes(HuffmanNode* Node, unsigned char data, char arr[], int size);
+int getCode(HuffmanNode* Node, unsigned char data, char arr[], int size);
 
-void getFrequency(FILE *entrada, unsigned int byteList[]);
+void BuildFrequencyList(FILE *entrada, unsigned int byteList[]);
 
 void CompressFile(const char *input, const char *output);
 

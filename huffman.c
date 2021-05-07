@@ -134,7 +134,7 @@ HuffmanNode* buildTree(unsigned int byteList[], int size){
 // o seu código a um vetor que contém 0 ou 1 nas posições, dependedo do caminho percorrido na árvore
 int getCode(HuffmanNode* Node, unsigned char data, char arr[], int size){
 
-    if(!Node->left && !Node->right && Node->data == data){
+    if(isLeaf(Node) && Node->data == data){
         arr[size] = '\0';
         return 1;
     }
@@ -228,12 +228,12 @@ void CompressFile(const char *input, const char *output){
     fseek(compressed, 0L, SEEK_END);
     double compressedSize = ftell(compressed);
 
-    printf("Taxa de compressao: %d%%\n", (int)((100 * compressedSize) / originalSize));
+    printf("Arquivo final com %d%% do tamanho do original.\n", (int)((100 * compressedSize) / originalSize));
 }
 
 void DecompressFile(const char *input, const char *output)
 {
-    //Abre os arquivos de entrada (comprimido - compressed) e saída (descomprimido - decompressed) 
+    //Abre os arquivos de entrada (comprimido - compressed) e saída (descomprimido - decompressed)
     FILE *compressed = fopen(input, "rb");
     if(!compressed){
         printf("Error opening input file");
@@ -276,9 +276,9 @@ void DecompressFile(const char *input, const char *output)
             //Se é um nó folha, escreve o caractere contido nele no arquivo descomprimido e volta para o início da árvore
             if(!aux_node->left && !aux_node->right)
             {
-                fwrite(&aux_node->data, sizeof(unsigned char), 1, decompressed);  
+                fwrite(&aux_node->data, sizeof(unsigned char), 1, decompressed);
                 aux_node = root;
-            }   
+            }
         }
     }
 }
