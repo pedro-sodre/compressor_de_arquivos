@@ -101,7 +101,7 @@ void CompressFileLZ78Trie(const char* input, const char* output)
 
         if(!current_node->nodes[data] || strlen(prefix) >= MAX_TRIE_HEIGHT - 1)
         {
-            insertTrie(dict, prefix, current_index++);
+            insertTrie(current_node, str, current_index++);
 
             //Escreve o índice do último prefixo existente no dicionário
             //e o caractere significativo no arquivo de saída

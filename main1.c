@@ -1,6 +1,5 @@
 #include <time.h>
 #include "huffman.h"
-#include "hash.h"
 #include "trie.h"
 
 int main(){

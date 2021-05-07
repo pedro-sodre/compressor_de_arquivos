@@ -3,14 +3,14 @@ all: teste1 teste2 teste3 clean
 	@echo "Segundo teste(.png): ./teste2"
 	@echo "Terceiro teste(.pdf): ./teste3"
 
-teste1: huffman.o hash.o main1.o trie.o
-	gcc -g -o teste1 trie.o huffman.o hash.o main1.o -lm
+teste1: huffman.o main1.o trie.o
+	gcc -g -o teste1 trie.o huffman.o main1.o -lm
 
-teste2: huffman.o hash.o main2.o
-	gcc -g -o teste2 huffman.o hash.o main2.o -lm
+teste2: huffman.o main2.o
+	gcc -g -o teste2 huffman.o main2.o -lm
 
-teste3: huffman.o hash.o main3.o
-	gcc -g -o teste3 huffman.o hash.o main3.o -lm
+teste3: huffman.o main3.o
+	gcc -g -o teste3 huffman.o main3.o -lm
 
 huffman.o: huffman.c
 	gcc -g -o huffman.o -c huffman.c
@@ -23,9 +23,6 @@ main2.o: main2.c
 
 main3.o: main3.c
 	gcc -g -o main3.o -c main3.c
-
-hash.o: hash.c
-	gcc -g -o hash.o -c hash.c
 
 trie.o: trie.c
 	gcc -g -o trie.o -c trie.c
